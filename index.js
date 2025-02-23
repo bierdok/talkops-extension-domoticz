@@ -4,7 +4,7 @@ const extension = new Extension("Domoticz");
 
 extension.setVersion("2024.7");
 
-extension.setDockerHubRepository("bierdok/talkops-extension-domoticz");
+extension.setDockerRepository("bierdok/talkops-extension-domoticz");
 
 extension.setDescription(
   "[Domoticz](https://www.domoticz.com/) is an open-source home automation system that allows users to control and monitor smart devices in their home, supports a wide range of devices and protocols, through a web interface, a mobile app and now with your voice thanks to TalkOps."
