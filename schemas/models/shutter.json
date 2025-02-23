@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The unique identifier"
+    },
+    "place": {
+      "type": "string",
+      "description": "The place"
+    },
+    "state": {
+      "type": "string",
+      "enum": ["opened", "closed"],
+      "description": "The current state"
+    },
+    "room": {
+      "type": "string",
+      "description": "The room"
+    },
+    "floor": {
+      "type": "string",
+      "description": "The floor"
+    }
+  },
+  "required": ["id", "place", "state"]
+}

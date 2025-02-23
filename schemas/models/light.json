@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The unique identifier"
+    },
+    "location": {
+      "type": "string",
+      "description": "The light location"
+    },
+    "state": {
+      "type": "string",
+      "enum": ["on", "off"],
+      "description": "The light state"
+    },
+    "room": {
+      "type": "string",
+      "description": "The light room"
+    },
+    "floor": {
+      "type": "string",
+      "description": "The light floor"
+    }
+  },
+  "required": ["id", "location", "state"]
+}

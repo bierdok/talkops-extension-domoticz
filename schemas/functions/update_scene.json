@@ -1,0 +1,19 @@
+{
+  "name": "update_scene",
+  "description": "Update scene",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["On", "Off", "Toggle"],
+        "description": "The desired action"
+      },
+      "id": {
+        "type": "string",
+        "description": "The scene identifier"
+      }
+    },
+    "required": ["action", "id"]
+  }
+}
