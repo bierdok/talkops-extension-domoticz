@@ -7,7 +7,7 @@ A TalkOps Extension made to work with [TalkOps](https://link.talkops.app/talkops
 
 ## Installation Guide
 
-Install [TalkOps](https://link.talkops.app/install-talkops).
+_[TalkOps](https://link.talkops.app/install-talkops) must be installed beforehand._
 
 1. Enable the API in Domoticz: `Setup › Settings › Security`
 2. Create a new user specifically for the TalkOps integration: `Setup › Users`
@@ -19,7 +19,7 @@ Install [TalkOps](https://link.talkops.app/install-talkops).
 Add the service and setup the environment variables if needed:
 
 _compose.yml_
-```
+``` yml
 name: talkops
 
 services:
