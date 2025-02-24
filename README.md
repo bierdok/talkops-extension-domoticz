@@ -3,7 +3,9 @@
 
 A TalkOps Extension made to work with [TalkOps](https://link.talkops.app/talkops).
 
-[Domoticz](https://www.domoticz.com/) is an open-source home automation system that allows users to control and monitor smart devices in their home, supports a wide range of devices and protocols, through a web interface, a mobile app and now with your voice thanks to TalkOps.
+The [Domoticz](https://www.domoticz.com/) extension is a home automation tool that helps you to control various espects such as lights, scenes, sensors and shutters. You can tourn lights on or off, enable or disable scenes, monitor temperature and humidity levels, and open or close shutters. This extension ensures that you can conveniently manage and automate your household environment.
+
+![Screenshot](screenshot.png)
 
 ## Installation Guide
 
