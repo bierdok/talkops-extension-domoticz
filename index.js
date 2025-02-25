@@ -7,14 +7,14 @@ extension.setVersion("2024.7");
 extension.setDockerRepository("bierdok/talkops-extension-domoticz");
 
 extension.setDescription(`
-The [Domoticz](https://www.domoticz.com/) extension is a home automation tool that helps you to control various espects such as lights, scenes, sensors and shutters. You can tourn lights on or off, enable or disable scenes, monitor temperature and humidity levels, and open or close shutters. This extension ensures that you can conveniently manage and automate your household environment.
+This Extension based on [Domoticz](https://www.domoticz.com/) allows you to control connected devices by voice in **realtime**.
 
 ![Screenshot](screenshot.png)
 `);
 
 extension.setInstallationGuide(`
-1. Enable the API in Domoticz: \`Setup › Settings › Security\`
-2. Create a new user specifically for the TalkOps integration: \`Setup › Users\`
+1. Enable the API in Domoticz: \`Setup → Settings → Security\`
+2. Create a new user specifically for the TalkOps integration: \`Setup → Users\`
 3. Grant this user access to the devices you want to control by voice: \`Set Devices\`
 4. Set the environment variables using the credentials of the newly created user.
 `);
