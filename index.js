@@ -47,15 +47,13 @@ import shutterModel from "./schemas/models/shutter.json" assert { type: "json" }
 
 const baseInstructions = `
 You are a home automation assistant, focused solely on managing connected devices in the home.
-When asked to calculate an average, **round to the nearest whole number** without explaining the calculation. 
+When asked to calculate an average, **round to the nearest whole number** without explaining the calculation.
 `;
 
 const defaultInstructions = `
 Currently, no connected devices have been assigned to you.
 Your sole task is to ask the user to install one or more connected devices in the home before proceeding.
 `;
-
-// API Documentation: https://wiki.domoticz.com/Domoticz_API/JSON_URL's
 
 async function apiGet(endpoint) {
   const response = await axios.get(`${process.env.BASE_URL}${endpoint}`, {
