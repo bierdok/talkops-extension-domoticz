@@ -22,7 +22,7 @@ extension.setInstallationGuide(`
 extension.setEnvironmentVariables({
   BASE_URL: {
     description: "The base URL of your Domoticz server.",
-    defaultValue: "http://domoticz:8080",
+    possibleValues: ["http://domoticz:8080", "https://domoticz.mydomain.net"],
   },
   USERNAME: {
     description: "The username for authenticating with the Domoticz API.",

@@ -28,6 +28,8 @@ services:
 ...
   talkops-extension-domoticz:
     image: bierdok/talkops-extension-domoticz
+    environment:
+      BASE_URL: [your-value]
     restart: unless-stopped
 ```
 
@@ -36,7 +38,7 @@ services:
 #### BASE_URL
 
 The base URL of your Domoticz server.
-* Default value: `http://domoticz:8080`
+* Possible values: `http://domoticz:8080` `https://domoticz.mydomain.net`
 
 #### USERNAME
 
@@ -52,3 +54,4 @@ The password related to username.
 
 A comma-separated list of WebSocket server URLs for real-time communication with specified agents.
 * Default value: `ws://talkops`
+* Possible values: `ws://talkops1` `ws://talkops2`
