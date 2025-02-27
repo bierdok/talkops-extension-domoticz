@@ -1,0 +1,22 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "The scene unique identifier"
+      },
+      "name": {
+        "type": "string",
+        "description": "The scene name"
+      },
+      "state": {
+        "type": "string",
+        "enum": ["enabled", "disabled"],
+        "description": "The current scene state (optional)"
+      }
+    },
+    "required": ["id", "name"]
+  }
+}

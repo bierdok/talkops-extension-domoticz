@@ -40,10 +40,10 @@ import updateLightsFunction from "./schemas/functions/update_lights.json" assert
 import updateSceneFunction from "./schemas/functions/update_scene.json" assert { type: "json" };
 import updateShuttersFunction from "./schemas/functions/update_shutters.json" assert { type: "json" };
 
-import lightModel from "./schemas/models/light.json" assert { type: "json" };
-import sceneModel from "./schemas/models/scene.json" assert { type: "json" };
-import sensorModel from "./schemas/models/sensor.json" assert { type: "json" };
-import shutterModel from "./schemas/models/shutter.json" assert { type: "json" };
+import lightsModel from "./schemas/models/lights.json" assert { type: "json" };
+import scenesModel from "./schemas/models/scenes.json" assert { type: "json" };
+import sensorsModel from "./schemas/models/sensors.json" assert { type: "json" };
+import shuttersModel from "./schemas/models/shutters.json" assert { type: "json" };
 
 const baseInstructions = `
 You are a home automation assistant, focused solely on managing connected devices in the home.
@@ -158,6 +158,7 @@ async function updateDevices() {
 }
 
 async function refresh() {
+  extension.errors = []
   try {
     devices = await updateDevices();
   } catch (e) {
@@ -178,24 +179,24 @@ async function refresh() {
       instructions.push(defaultInstructions);
     } else {
       if (devices.lights.length) {
-        instructions.push("Lights");
-        instructions.push(`* Model: ${JSON.stringify(lightModel)}`);
-        instructions.push(`* List: ${JSON.stringify(devices.lights)}`);
+        instructions.push("# Lights");
+        instructions.push(`* Model: ${JSON.stringify(lightsModel)}`);
+        instructions.push(`* Data: ${JSON.stringify(devices.lights)}`);
       }
       if (devices.scenes.length) {
-        instructions.push("Scenes");
-        instructions.push(`* Model: ${JSON.stringify(sceneModel)}`);
-        instructions.push(`* List: ${JSON.stringify(devices.scenes)}`);
+        instructions.push("# Scenes");
+        instructions.push(`* Model: ${JSON.stringify(scenesModel)}`);
+        instructions.push(`* Data: ${JSON.stringify(devices.scenes)}`);
       }
       if (devices.sensors.length) {
-        instructions.push("Sensors");
-        instructions.push(`* Model: ${JSON.stringify(sensorModel)}`);
-        instructions.push(`* List: ${JSON.stringify(devices.sensors)}`);
+        instructions.push("# Sensors");
+        instructions.push(`* Model: ${JSON.stringify(sensorsModel)}`);
+        instructions.push(`* Data: ${JSON.stringify(devices.sensors)}`);
       }
       if (devices.shutters.length) {
-        instructions.push("Shutters");
-        instructions.push(`* Model: ${JSON.stringify(shutterModel)}`);
-        instructions.push(`* List: ${JSON.stringify(devices.shutters)}`);
+        instructions.push("# Shutters");
+        instructions.push(`* Model: ${JSON.stringify(shuttersModel)}`);
+        instructions.push(`* Data: ${JSON.stringify(devices.shutters)}`);
       }
     }
     return instructions;
@@ -216,6 +217,7 @@ async function refresh() {
     }
     return functionSchemas;
   });
+
   setTimeout(refresh, 10000);
 }
 if (extension.errors.length === 0) {
@@ -248,7 +250,7 @@ extension.setFunctions([
           throw { message: "bad_request" };
         }
       }
-      return "Done.";
+      return `${action}ing.`;
     } catch (e) {
       return `Error: ${e.message}`;
     }
