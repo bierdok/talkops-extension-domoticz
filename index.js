@@ -2,8 +2,6 @@ import { Extension, Readme, Service } from "talkops";
 
 const extension = new Extension("Domoticz");
 
-extension.setVersion("2024.7");
-
 extension.setDockerRepository("bierdok/talkops-extension-domoticz");
 
 extension.setDescription(`
@@ -66,6 +64,7 @@ async function apiGet(endpoint) {
 }
 
 let devices = null;
+
 async function updateDevices() {
   const rooms = [];
   const lights = [];
@@ -158,6 +157,9 @@ async function updateDevices() {
 }
 
 async function refresh() {
+  const v = await apiGet("/json.htm?type=command&param=getversion");
+  extension.setVersion(v.version);
+
   extension.errors = []
   try {
     devices = await updateDevices();
