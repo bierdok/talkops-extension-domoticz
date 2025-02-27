@@ -11,10 +11,11 @@ This Extension based on [Domoticz](https://www.domoticz.com/) allows you to cont
 
 _[TalkOps](https://link.talkops.app/install-talkops) must be installed beforehand._
 
-1. Enable the API in Domoticz: `Setup → Settings → Security`
-2. Create a new user specifically for the TalkOps integration: `Setup → Users`
-3. Grant this user access to the devices you want to control by voice: `Set Devices`
-4. Set the environment variables using the credentials of the newly created user.
+1. Make sure your Domoticz version is newer than `2023.2`.
+2. Enable the API in Domoticz: `Setup → Settings → Security`
+3. Create a new user specifically for the TalkOps integration: `Setup → Users`
+4. Grant this user access to the devices you want to control by voice: `Set Devices`
+5. Set the environment variables using the credentials of the newly created user.
 
 ## Integration Guide
 
