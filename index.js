@@ -65,7 +65,7 @@ Currently, no connected devices have been assigned to you.
 Your sole task is to ask the user to install one or more connected devices in the home before proceeding.
 `;
 
-async function req(param) {
+async function request(param) {
   const response = await axios.get(
     `${process.env.BASE_URL}/json.htm?type=command&param=${param}`,
     {
@@ -88,19 +88,19 @@ async function refresh() {
   let scenes = [];
 
   try {
-    const v = await req("getversion");
+    const v = await request("getversion");
     extension.setVersion(v.version);
 
-    const p = await req("getsettings");
+    const p = await request("getsettings");
 
-    const fps = await req("getfloorplans");
+    const fps = await request("getfloorplans");
     if (fps.result) {
       for (const fp of fps.result) {
         floors.push({
           id: parseInt(fp.idx),
           name: fp.Name,
         });
-        const fpps = await req(`getfloorplanplans&idx=${fp.idx}`);
+        const fpps = await request(`getfloorplanplans&idx=${fp.idx}`);
         if (fpps.result) {
           for (const fpp of fpps.result) {
             fpp.floor = fp.idx;
@@ -113,7 +113,7 @@ async function refresh() {
         }
       }
     }
-    const ds = await req("getdevices");
+    const ds = await request("getdevices");
     if (ds.result) {
       for (const d of ds.result) {
         let room_id = null;
@@ -186,7 +186,7 @@ async function refresh() {
         }
       }
     }
-    const ss = await req("getscenes");
+    const ss = await request("getscenes");
     if (ss.result) {
       for (const s of ss.result) {
         let state = null;
@@ -202,8 +202,7 @@ async function refresh() {
     }
 
     extension.setInstructions(() => {
-      const instructions = [];
-      instructions.push(baseInstructions);
+      const instructions = [baseInstructions];
 
       if (
         !lights.length &&
@@ -263,7 +262,7 @@ extension.setFunctions([
   async function update_lights(action, ids) {
     try {
       for (const id of ids) {
-        const response = await req(`switchlight&idx=${id}&switchcmd=${action}`);
+        const response = await request(`switchlight&idx=${id}&switchcmd=${action}`);
         if (response.status === "ERR") {
           throw { message: "bad_request" };
         }
@@ -276,7 +275,7 @@ extension.setFunctions([
   async function update_shutters(action, ids) {
     try {
       for (const id of ids) {
-        const response = await req(`switchlight&idx=${id}&switchcmd=${action}`);
+        const response = await request(`switchlight&idx=${id}&switchcmd=${action}`);
         if (response.status === "ERR") {
           throw { message: "bad_request" };
         }
@@ -289,7 +288,7 @@ extension.setFunctions([
   async function update_scenes(action, ids) {
     try {
       for (const id of ids) {
-        const response = await req(`switchscene&idx=${id}&switchcmd=${action}`);
+        const response = await request(`switchscene&idx=${id}&switchcmd=${action}`);
         if (response.status === "ERR") {
           throw { message: "bad_request" };
         }
