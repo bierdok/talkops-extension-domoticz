@@ -205,10 +205,15 @@ async function refresh() {
       const instructions = [];
       instructions.push(baseInstructions);
 
-      if (!lights && !shutters && !sensors && !scenes) {
+      if (
+        !lights.length &&
+        !shutters.length &&
+        !sensors.length &&
+        !scenes.length
+      ) {
         instructions.push(defaultInstructions);
       } else {
-        instructions.push('``` yaml');
+        instructions.push("``` yaml");
         instructions.push(
           yaml.dump({
             floorsModel,
@@ -225,7 +230,7 @@ async function refresh() {
             scenes,
           })
         );
-        instructions.push('```');
+        instructions.push("```");
       }
 
       return instructions;
@@ -245,8 +250,6 @@ async function refresh() {
       return functionSchemas;
     });
   } catch (err) {
-    console.log(err)
-
     extension.errors = [err.message];
   }
 
