@@ -5,17 +5,25 @@ A TalkOps Extension made to work with [TalkOps](https://link.talkops.app/talkops
 
 This Extension based on [Domoticz](https://www.domoticz.com/) allows you to control connected devices by voice in **realtime**.
 
+## Features
+* Lights: Check status, turn on/off
+* Shutters: Check status, open, close and stop
+* Scene: Check status, enable, disable and toggle
+* Sensors: Check status
+
+## Screenshot
 ![Screenshot](screenshot.png)
 
 ## Installation Guide
 
 _[TalkOps](https://link.talkops.app/install-talkops) must be installed beforehand._
 
-1. Make sure your Domoticz version is newer than `2023.2`.
-2. Enable the API in Domoticz: `Setup → Settings → Security`
-3. Create a new user specifically for the TalkOps integration: `Setup → Users`
-4. Grant this user access to the devices you want to control by voice: `Set Devices`
-5. Set the environment variables using the credentials of the newly created user.
+* Make sure your Domoticz version is newer than `2023.2`.
+* Open Domoticz from a web browser with admin permissions.
+* Enable the API: `Setup → Settings → Security`
+* Create a new user specifically for the TalkOps integration: `Setup → Users`
+* Grant this user access to the devices you want to control by voice: `Set Devices`
+* Set the environment variables using the credentials of the newly created user.
 
 ## Integration Guide
 

@@ -4,27 +4,27 @@
     "type": "object",
     "properties": {
       "id": {
-        "type": "string",
+        "type": "integer",
         "description": "The shutter unique identifier"
       },
-      "place": {
+      "name": {
         "type": "string",
-        "description": "The shutter place"
+        "description": "The shutter name"
+      },
+      "description": {
+        "type": "string",
+        "description": "The shutter description"
       },
       "state": {
         "type": "string",
-        "enum": ["opened", "closed"],
+        "enum": ["opened", "unknown", "closed"],
         "description": "The shutter current state"
       },
-      "room": {
-        "type": "string",
-        "description": "The shutter room"
-      },
-      "floor": {
-        "type": "string",
-        "description": "The shutter floor"
+      "room_id": {
+        "type": "integer",
+        "description": "The related room identifier"
       }
     },
-    "required": ["id", "place", "state"]
+    "required": ["id", "name", "state"]
   }
 }

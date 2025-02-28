@@ -11,9 +11,13 @@
         "type": "string",
         "description": "The scene name"
       },
+      "description": {
+        "type": "string",
+        "description": "The scene description"
+      },
       "state": {
         "type": "string",
-        "enum": ["enabled", "disabled"],
+        "enum": ["enabled", "disabled", null],
         "description": "The current scene state (optional)"
       }
     },

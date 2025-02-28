@@ -7,15 +7,23 @@ extension.setDockerRepository("bierdok/talkops-extension-domoticz");
 extension.setDescription(`
 This Extension based on [Domoticz](https://www.domoticz.com/) allows you to control connected devices by voice in **realtime**.
 
+## Features
+* Lights: Check status, turn on/off
+* Shutters: Check status, open, close and stop
+* Scene: Check status, enable, disable and toggle
+* Sensors: Check status
+
+## Screenshot
 ![Screenshot](screenshot.png)
 `);
 
 extension.setInstallationGuide(`
-1. Make sure your Domoticz version is newer than \`2023.2\`.
-2. Enable the API in Domoticz: \`Setup → Settings → Security\`
-3. Create a new user specifically for the TalkOps integration: \`Setup → Users\`
-4. Grant this user access to the devices you want to control by voice: \`Set Devices\`
-5. Set the environment variables using the credentials of the newly created user.
+* Make sure your Domoticz version is newer than \`2023.2\`.
+* Open Domoticz from a web browser with admin permissions.
+* Enable the API: \`Setup → Settings → Security\`
+* Create a new user specifically for the TalkOps integration: \`Setup → Users\`
+* Grant this user access to the devices you want to control by voice: \`Set Devices\`
+* Set the environment variables using the credentials of the newly created user.
 `);
 
 extension.setEnvironmentVariables({
@@ -34,15 +42,18 @@ extension.setEnvironmentVariables({
 });
 
 import axios from "axios";
+import yaml from "js-yaml";
+
+import floorsModel from "./schemas/models/floors.json" assert { type: "json" };
+import roomsModel from "./schemas/models/rooms.json" assert { type: "json" };
+import lightsModel from "./schemas/models/lights.json" assert { type: "json" };
+import shuttersModel from "./schemas/models/shutters.json" assert { type: "json" };
+import sensorsModel from "./schemas/models/sensors.json" assert { type: "json" };
+import scenesModel from "./schemas/models/scenes.json" assert { type: "json" };
 
 import updateLightsFunction from "./schemas/functions/update_lights.json" assert { type: "json" };
-import updateSceneFunction from "./schemas/functions/update_scene.json" assert { type: "json" };
+import updateScenesFunction from "./schemas/functions/update_scenes.json" assert { type: "json" };
 import updateShuttersFunction from "./schemas/functions/update_shutters.json" assert { type: "json" };
-
-import lightsModel from "./schemas/models/lights.json" assert { type: "json" };
-import scenesModel from "./schemas/models/scenes.json" assert { type: "json" };
-import sensorsModel from "./schemas/models/sensors.json" assert { type: "json" };
-import shuttersModel from "./schemas/models/shutters.json" assert { type: "json" };
 
 const baseInstructions = `
 You are a home automation assistant, focused solely on managing connected devices in the home.
@@ -54,174 +65,192 @@ Currently, no connected devices have been assigned to you.
 Your sole task is to ask the user to install one or more connected devices in the home before proceeding.
 `;
 
-async function apiGet(endpoint) {
-  const response = await axios.get(`${process.env.BASE_URL}${endpoint}`, {
-    auth: {
-      username: process.env.USERNAME,
-      password: process.env.PASSWORD,
-    },
-  });
+async function req(param) {
+  const response = await axios.get(
+    `${process.env.BASE_URL}/json.htm?type=command&param=${param}`,
+    {
+      auth: {
+        username: process.env.USERNAME,
+        password: process.env.PASSWORD,
+      },
+    }
+  );
   return response.data;
 }
 
-let devices = null;
+async function refresh() {
+  extension.errors = [];
+  let floors = [];
+  let rooms = [];
+  let lights = [];
+  let shutters = [];
+  let sensors = [];
+  let scenes = [];
 
-async function updateDevices() {
-  const rooms = [];
-  const lights = [];
-  const shutters = [];
-  const sensors = [];
-  const scenes = [];
+  try {
+    const v = await req("getversion");
+    extension.setVersion(v.version);
 
-  const p = await apiGet("/json.htm?type=command&param=getsettings");
+    const p = await req("getsettings");
 
-  const ss = await apiGet("/json.htm?type=command&param=getscenes");
-  if (ss.result) {
-    for (const s of ss.result) {
-      let state = null;
-      if (s.Type === "Group") {
-        state = s.Status === "On" ? "enabled" : "disabled";
+    const fps = await req("getfloorplans");
+    if (fps.result) {
+      for (const fp of fps.result) {
+        floors.push({
+          id: parseInt(fp.idx),
+          name: fp.Name,
+        });
+        const fpps = await req(`getfloorplanplans&idx=${fp.idx}`);
+        if (fpps.result) {
+          for (const fpp of fpps.result) {
+            fpp.floor = fp.idx;
+            rooms.push({
+              id: parseInt(fpp.idx),
+              name: fpp.Name,
+              floor_id: parseInt(fp.idx),
+            });
+          }
+        }
       }
-      scenes.push({
-        id: s.idx,
-        name: s.Name,
-        state,
-      });
     }
-  }
-
-  const fps = await apiGet("/json.htm?type=command&param=getfloorplans");
-  if (fps.result) {
-    for (const fp of fps.result) {
-      const fpps = await apiGet(
-        `/json.htm?type=command&param=getfloorplanplans&idx=${fp.idx}`
-      );
-      if (fpps.result) {
-        for (const fpp of fpps.result) {
-          fpp.floor = fp.idx;
-          rooms.push({
-            id: fpp.idx,
-            name: fpp.Name,
-            floor: fp.Name,
+    const ds = await req("getdevices");
+    if (ds.result) {
+      for (const d of ds.result) {
+        let room_id = null;
+        let pid = d.PlanIDs.filter((value) => value !== 0)[0];
+        if (pid) {
+          room_id = pid;
+        }
+        if (d.SwitchType === "On/Off") {
+          lights.push({
+            id: parseInt(d.idx),
+            name: d.Name,
+            description: d.Description || null,
+            state: d.Status === "On" ? "on" : "off",
+            room_id,
+          });
+        } else if (
+          d.SwitchType === "Blinds" ||
+          d.SwitchType === "Blinds + Stop"
+        ) {
+          let state = "opened";
+          if (d.Status === "Closed") state = "closed";
+          if (d.Status === "Stopped") state = "unknown";
+          shutters.push({
+            id: parseInt(d.idx),
+            name: d.Name,
+            description: d.Description || null,
+            state,
+            room_id,
+          });
+        } else if (d.Type.startsWith("Temp")) {
+          if (d.Temp !== undefined) {
+            sensors.push({
+              name: d.Name,
+              description: d.Description || null,
+              type: "temperature",
+              value: `${d.Temp}`,
+              unit: p.TempUnit === 1 ? "°F" : "°C",
+              room_id,
+            });
+          }
+          if (d.Humidity !== undefined) {
+            sensors.push({
+              name: d.Name,
+              description: d.Description || null,
+              type: "humidity",
+              value: `${d.Humidity}`,
+              unit: "%",
+              room_id,
+            });
+          }
+          if (d.Barometer !== undefined) {
+            sensors.push({
+              name: d.Name,
+              description: d.Description || null,
+              type: "pressure",
+              value: `${d.Barometer}`,
+              unit: "hPa",
+              room_id,
+            });
+          }
+        } else if (d.Type.startsWith("Air Quality")) {
+          sensors.push({
+            name: d.Name,
+            description: d.Description || null,
+            type: "air_quality",
+            value: d.Data.replace(/ ppm$/, ""),
+            unit: "ppm",
+            room_id,
           });
         }
       }
     }
-  }
-
-  const ds = await apiGet("/json.htm?type=command&param=getdevices");
-  if (ds.result) {
-    for (const d of ds.result) {
-      let room = null;
-      let floor = null;
-      let pid = d.PlanIDs.filter((value) => value !== 0)[0];
-      if (pid) {
-        pid = pid.toString();
-        for (const r of rooms) {
-          if (r.id === pid) {
-            room = r.name;
-            floor = r.floor;
-          }
+    const ss = await req("getscenes");
+    if (ss.result) {
+      for (const s of ss.result) {
+        let state = null;
+        if (s.Type === "Group") {
+          state = s.Status === "On" ? "enabled" : "disabled";
         }
-      }
-      const names = d.Name.split(" - ");
-      if (d.SwitchType === "On/Off") {
-        lights.push({
-          id: d.idx,
-          state: d.Status === "On" ? "on" : "off",
-          place: d.Description || names[names.length - 1],
-          room: room || names[0],
-          floor,
-        });
-      } else if (d.SwitchType === "Blinds") {
-        shutters.push({
-          id: d.idx,
-          state: d.Status === "Open" ? "opened" : "closed",
-          place: d.Description || names[names.length - 1],
-          room: room || names[0],
-          floor,
-        });
-      } else if (d.Type.startsWith("Temp")) {
-        sensors.push({
-          id: d.idx,
-          temperature: d.Temp !== undefined ? d.Temp : null,
-          temperature_unit: `°${p.TempUnit === 1 ? "F" : "C"}`,
-          humidity: d.Humidity !== undefined ? d.Humidity : null,
-          pressure: d.Barometer !== undefined ? d.Barometer : null,
-          room: room === null ? d.Name : room,
-          floor,
+        scenes.push({
+          id: s.idx,
+          name: s.Name,
+          state,
         });
       }
     }
-  }
-  return { lights, shutters, sensors, scenes };
-}
 
-async function refresh() {
-  const v = await apiGet("/json.htm?type=command&param=getversion");
-  extension.setVersion(v.version);
+    extension.setInstructions(() => {
+      const instructions = [];
+      instructions.push(baseInstructions);
 
-  extension.errors = []
-  try {
-    devices = await updateDevices();
-  } catch (e) {
-    extension.errors.push(e.message);
-    devices = null;
-  }
+      if (!lights && !shutters && !sensors && !scenes) {
+        instructions.push(defaultInstructions);
+      } else {
+        instructions.push('``` yaml');
+        instructions.push(
+          yaml.dump({
+            floorsModel,
+            roomsModel,
+            lightsModel,
+            shuttersModel,
+            sensorsModel,
+            scenesModel,
+            floors,
+            rooms,
+            lights,
+            shutters,
+            sensors,
+            scenes,
+          })
+        );
+        instructions.push('```');
+      }
 
-  extension.setInstructions(async () => {
-    const instructions = [];
-    instructions.push(baseInstructions);
-    if (
-      !devices ||
-      (devices.lights.length === 0 &&
-        devices.shutters.length === 0 &&
-        devices.sensors.length === 0 &&
-        devices.scenes.length === 0)
-    ) {
-      instructions.push(defaultInstructions);
-    } else {
-      if (devices.lights.length) {
-        instructions.push("# Lights");
-        instructions.push(`* Model: ${JSON.stringify(lightsModel)}`);
-        instructions.push(`* Data: ${JSON.stringify(devices.lights)}`);
-      }
-      if (devices.scenes.length) {
-        instructions.push("# Scenes");
-        instructions.push(`* Model: ${JSON.stringify(scenesModel)}`);
-        instructions.push(`* Data: ${JSON.stringify(devices.scenes)}`);
-      }
-      if (devices.sensors.length) {
-        instructions.push("# Sensors");
-        instructions.push(`* Model: ${JSON.stringify(sensorsModel)}`);
-        instructions.push(`* Data: ${JSON.stringify(devices.sensors)}`);
-      }
-      if (devices.shutters.length) {
-        instructions.push("# Shutters");
-        instructions.push(`* Model: ${JSON.stringify(shuttersModel)}`);
-        instructions.push(`* Data: ${JSON.stringify(devices.shutters)}`);
-      }
-    }
-    return instructions;
-  });
+      return instructions;
+    });
 
-  extension.setFunctionSchemas(() => {
-    const functionSchemas = [];
-    if (devices) {
-      if (devices.lights.length) {
+    extension.setFunctionSchemas(() => {
+      const functionSchemas = [];
+      if (lights) {
         functionSchemas.push(updateLightsFunction);
       }
-      if (devices.scenes.length) {
-        functionSchemas.push(updateSceneFunction);
+      if (scenes) {
+        functionSchemas.push(updateScenesFunction);
       }
-      if (devices.shutters.length) {
+      if (shutters) {
         functionSchemas.push(updateShuttersFunction);
       }
-    }
-    return functionSchemas;
-  });
+      return functionSchemas;
+    });
+  } catch (err) {
+    console.log(err)
 
-  setTimeout(refresh, 10000);
+    extension.errors = [err.message];
+  }
+
+  setTimeout(refresh, 5000);
 }
 if (extension.errors.length === 0) {
   refresh();
@@ -231,9 +260,7 @@ extension.setFunctions([
   async function update_lights(action, ids) {
     try {
       for (const id of ids) {
-        const response = await apiGet(
-          `/json.htm?type=command&param=switchlight&idx=${id}&switchcmd=${action}`
-        );
+        const response = await req(`switchlight&idx=${id}&switchcmd=${action}`);
         if (response.status === "ERR") {
           throw { message: "bad_request" };
         }
@@ -246,9 +273,7 @@ extension.setFunctions([
   async function update_shutters(action, ids) {
     try {
       for (const id of ids) {
-        const response = await apiGet(
-          `/json.htm?type=command&param=switchlight&idx=${id}&switchcmd=${action}`
-        );
+        const response = await req(`switchlight&idx=${id}&switchcmd=${action}`);
         if (response.status === "ERR") {
           throw { message: "bad_request" };
         }
@@ -258,13 +283,13 @@ extension.setFunctions([
       return `Error: ${e.message}`;
     }
   },
-  async function update_scene(action, id) {
+  async function update_scenes(action, ids) {
     try {
-      const response = await apiGet(
-        `/json.htm?type=command&param=switchscene&idx=${id}&switchcmd=${action}`
-      );
-      if (response.status === "ERR") {
-        throw { message: "bad_request" };
+      for (const id of ids) {
+        const response = await req(`switchscene&idx=${id}&switchcmd=${action}`);
+        if (response.status === "ERR") {
+          throw { message: "bad_request" };
+        }
       }
       return "Done.";
     } catch (e) {

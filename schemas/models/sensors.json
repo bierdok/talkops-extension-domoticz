@@ -3,36 +3,32 @@
   "items": {
     "type": "object",
     "properties": {
-      "id": {
+      "name": {
         "type": "string",
-        "description": "The sensor unique identifier"
+        "description": "The sensor name"
       },
-      "temperature": {
+      "description": {
+        "type": "string",
+        "description": "The sensor description"
+      },
+      "type": {
+        "type": "string",
+        "enum": ["temperature", "humidity", "pressure", "air_quality"],
+        "description": "The sensor type"
+      },
+      "value": {
+        "type": "string",
+        "description": "The sensor value"
+      },
+      "unit": {
+        "type": "string",
+        "description": "The sensor unit"
+      },
+      "room_id": {
         "type": "integer",
-        "description": "Temperature value (e.g., '21')"
-      },
-      "temperature_unit": {
-        "type": "string",
-        "description": "Temperature unit ('°C': degree celsius,'°F': degree fahrenheit)",
-        "enum": ["°C", "°F"]
-      },
-      "humidity": {
-        "type": "integer",
-        "description": "Humidity level in percent (optional, e.g., '60')"
-      },
-      "pressure": {
-        "type": "integer",
-        "description": "Pressure in hectopascals (optional, e.g., '1038')"
-      },
-      "room": {
-        "type": "string",
-        "description": "The sensor room"
-      },
-      "floor": {
-        "type": "string",
-        "description": "The sensor floor"
+        "description": "The related room identifier"
       }
     },
-    "required": ["id", "temperature", "temperature_unit", "room"]
+    "required": ["name", "type", "value", "unit"]
   }
 }

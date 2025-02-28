@@ -4,27 +4,27 @@
     "type": "object",
     "properties": {
       "id": {
-        "type": "string",
+        "type": "integer",
         "description": "The light unique identifier"
       },
-      "location": {
+      "name": {
         "type": "string",
-        "description": "The light location"
+        "description": "The light name"
+      },
+      "description": {
+        "type": "string",
+        "description": "The light description"
       },
       "state": {
         "type": "string",
         "enum": ["on", "off"],
         "description": "The light state"
       },
-      "room": {
-        "type": "string",
-        "description": "The light room"
-      },
-      "floor": {
-        "type": "string",
-        "description": "The light floor"
+      "room_id": {
+        "type": "integer",
+        "description": "The related room identifier"
       }
     },
-    "required": ["id", "location", "state"]
+    "required": ["id", "name", "state"]
   }
 }
