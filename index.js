@@ -194,7 +194,7 @@ async function refresh() {
           state = s.Status === "On" ? "enabled" : "disabled";
         }
         scenes.push({
-          id: s.idx,
+          id: parseInt(s.idx),
           name: s.Name,
           state,
         });
