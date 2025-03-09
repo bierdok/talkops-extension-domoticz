@@ -5,7 +5,7 @@ const extension = new Extension("Domoticz");
 extension.setDockerRepository("bierdok/talkops-extension-domoticz");
 
 extension.setDescription(`
-This Extension based on [Domoticz](https://www.domoticz.com/) allows you to control connected devices by voice in **realtime**.
+This Extension based on [Domoticz](https://www.domoticz.com/) allows you to control connected devices ***by voice in real-time**.
 
 ## Features
 * Lights: Check status, turn on/off
