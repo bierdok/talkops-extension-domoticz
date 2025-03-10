@@ -40,6 +40,8 @@ services:
     environment:
       BASE_URL: [your-value]
     restart: unless-stopped
+
+
 ```
 
 ## Environment Variables
